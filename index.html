@@ -3,60 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Çoklu Zar Düellosu</title>
+    <title>Zar Düellosu</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>🎲 Çoklu Zar Düellosu</h1>
+        <h1>🎲 Zar Seçme Düellosu</h1>
         
         <div class="controls">
             <div class="control-group">
-                <label for="diceCount">Zar Adedi (1 - 6):</label>
+                <label for="diceCount">Atılacak Zar Adedi:</label>
                 <select id="diceCount">
                     <option value="1">1 Zar</option>
                     <option value="2">2 Zar</option>
                     <option value="3">3 Zar</option>
                     <option value="4">4 Zar</option>
                     <option value="5">5 Zar</option>
-                    <option value="6">6 Zar</option>
-                </select>
-            </div>
-
-            <div class="control-group">
-                <label for="gameMode">Oyun Modu:</label>
-                <select id="gameMode">
-                    <option value="normal">Normal Mod</option>
-                    <option value="rigged" selected>2. Oyuncu Kazanır!</option>
+                    <option value="6" selected>6 Zar</option>
                 </select>
             </div>
             
             <button id="rollBtn">Zarları At!</button>
         </div>
 
-        <!-- Oyuncu Alanları -->
-        <div class="players-container">
-            <div class="player-column">
-                <h3>1. Oyuncu</h3>
-                <div id="player1DiceContainer" class="dice-grid">
-                    <div class="dice">?</div>
-                </div>
-                <div class="score">Toplam: <span id="p1Score">0</span></div>
-            </div>
+        <!-- Zarların Listeleneceği Alan -->
+        <div class="dice-section">
+            <h3>1. Seçilen Zarlar</h3>
+            <div id="firstDiceContainer" class="dice-grid"></div>
+            <div class="score">Toplam: <span id="firstScore">0</span></div>
+        </div>
 
-            <div class="player-column">
-                <h3>2. Oyuncu (Şanslı)</h3>
-                <div id="player2DiceContainer" class="dice-grid">
-                    <div class="dice">?</div>
-                </div>
-                <div class="score">Toplam: <span id="p2Score">0</span></div>
-            </div>
+        <div class="dice-section">
+            <h3>2. Seçilen Zarlar (Hep Kazanır)</h3>
+            <div id="secondDiceContainer" class="dice-grid"></div>
+            <div class="score">Toplam: <span id="secondScore">0</span></div>
         </div>
 
         <div id="winnerText" class="winner-text"></div>
 
         <div class="history-container">
-            <h3>Geçmiş Maçlar</h3>
+            <h3>Geçmiş Atışlar</h3>
             <ul id="historyList"></ul>
         </div>
     </div>
