@@ -14,13 +14,13 @@ body {
 }
 
 .glass-container {
-    background: rgba(40, 40, 65, 0.7);
+    background: rgba(40, 40, 65, 0.75);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     padding: 22px;
     border-radius: 20px;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
-    width: 450px;
+    width: 440px;
     text-align: center;
 }
 
@@ -74,7 +74,7 @@ select {
 
 .section-box h3 {
     margin: 0 0 8px 0;
-    font-size: 12px;
+    font-size: 13px;
     color: #ff8e8e;
     text-align: left;
 }
@@ -84,11 +84,10 @@ select {
     flex-wrap: wrap;
     justify-content: center;
     gap: 10px;
-    min-height: 60px;
+    min-height: 65px;
     align-items: center;
 }
 
-/* Her bir zar birim kutusu ve sırama etiketi */
 .dice-wrapper {
     display: flex;
     flex-direction: column;
@@ -102,7 +101,7 @@ select {
     font-weight: bold;
 }
 
-/* 3D Görünümlü Zar Tasarımı (Noktalar için Grid) */
+/* 3D Görünümlü Zar Tasarımı (3x3 Nokta Grid Yapısı) */
 .dice-3d {
     width: 48px;
     height: 48px;
@@ -113,11 +112,10 @@ select {
     grid-template: repeat(3, 1fr) / repeat(3, 1fr);
     padding: 6px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.4), inset 0 2px 3px rgba(255,255,255,0.8);
-    transition: transform 0.3s ease, filter 0.2s;
+    transition: transform 0.4s ease, filter 0.2s;
     border: 1px solid #ccc;
 }
 
-/* Kullanıcının tıklayarak değiştirebileceği interaktif zar */
 .dice-3d.interactive {
     cursor: pointer;
 }
@@ -132,7 +130,7 @@ select {
     transform: rotate(360deg) scale(1.15);
 }
 
-/* Zar üzerindeki siyah noktalar (Dot) */
+/* Siyah Noktalar (Dot) */
 .dot {
     background-color: #222;
     border-radius: 50%;
@@ -144,7 +142,7 @@ select {
     box-shadow: inset 0 1px 2px rgba(0,0,0,0.6);
 }
 
-/* 1'den 6'ya kadar nokta konumlandırma kuralları */
+/* 1'den 6'ya kadar nokta dağılımı */
 [data-value="1"] .dot:nth-child(5) { display: block; }
 
 [data-value="2"] .dot:nth-child(1),
@@ -172,7 +170,6 @@ select {
 [data-value="6"] .dot:nth-child(7),
 [data-value="6"] .dot:nth-child(9) { display: block; }
 
-
 .score-display {
     margin-top: 6px;
     font-size: 11px;
@@ -196,13 +193,6 @@ select {
     color: white;
     box-shadow: 0 4px 15px rgba(0, 176, 155, 0.4);
     margin-top: 4px;
-}
-
-.btn.primary:disabled {
-    background: #44445c;
-    color: #8888a0;
-    cursor: not-allowed;
-    box-shadow: none;
 }
 
 .btn.secondary {
