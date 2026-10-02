@@ -1,45 +1,88 @@
 const rollBtn = document.getElementById('rollBtn');
+const diceCountSelect = document.getElementById('diceCount');
 const gameModeSelect = document.getElementById('gameMode');
-const player1Dice = document.getElementById('player1Dice');
-const player2Dice = document.getElementById('player2Dice');
+const p1Container = document.getElementById('player1DiceContainer');
+const p2Container = document.getElementById('player2DiceContainer');
+const p1ScoreEl = document.getElementById('p1Score');
+const p2ScoreEl = document.getElementById('p2Score');
 const winnerText = document.getElementById('winnerText');
 const historyList = document.getElementById('historyList');
 
 rollBtn.addEventListener('click', () => {
+    const count = parseInt(diceCountSelect.value);
     const isRigged = gameModeSelect.value === 'rigged';
-    
-    // Sallanma efekti başlat
-    player1Dice.classList.add('shake');
-    player2Dice.classList.add('shake');
-    player1Dice.textContent = '...';
-    player2Dice.textContent = '...';
+
+    // Alanları temizle ve sallanma efekti koy
+    p1Container.innerHTML = '';
+    p2Container.innerHTML = '';
+    p1ScoreEl.textContent = '...';
+    p2ScoreEl.textContent = '...';
     winnerText.textContent = '';
 
+    const p1DiceElements = [];
+    const p2DiceElements = [];
+
+    for (let i = 0; i < count; i++) {
+        const d1 = document.createElement('div');
+        d1.classList.add('dice', 'shake');
+        d1.textContent = '...';
+        p1Container.appendChild(d1);
+        p1DiceElements.push(d1);
+
+        const d2 = document.createElement('div');
+        d2.classList.add('dice', 'shake');
+        d2.textContent = '...';
+        p2Container.appendChild(d2);
+        p2DiceElements.push(d2);
+    }
+
     setTimeout(() => {
-        // 1. Oyuncu için 1 ile 6 arasında rastgele zar
-        const val1 = Math.floor(Math.random() * 6) + 1;
-        
-        let val2;
-        if (isRigged) {
-            // İkinci oyuncu modu açıksa: 1. oyuncunun değerinden 6'ya kadar rastgele seç
-            val2 = Math.floor(Math.random() * (7 - val1)) + val1;
-        } else {
-            // Normal mod: Tamamen bağımsız rastgele
-            val2 = Math.floor(Math.random() * 6) + 1;
+        let p1Values = [];
+        let p2Values = [];
+
+        // 1. Oyuncu için zarları at
+        for (let i = 0; i < count; i++) {
+            p1Values.push(Math.floor(Math.random() * 6) + 1);
         }
 
-        // Değerleri ekrana yansıt
-        player1Dice.textContent = val1;
-        player2Dice.textContent = val2;
-        
-        player1Dice.classList.remove('shake');
-        player2Dice.classList.remove('shake');
+        if (isRigged) {
+            // Hileli Mod: 2. oyuncunun toplamı 1. oyuncudan az olamaz
+            const p1Total = p1Values.reduce((a, b) => a + b, 0);
+            let p2Total = 0;
+            
+            while (p2Total < p1Total) {
+                p2Values = [];
+                for (let i = 0; i < count; i++) {
+                    p2Values.push(Math.floor(Math.random() * 6) + 1);
+                }
+                p2Total = p2Values.reduce((a, b) => a + b, 0);
+            }
+        } else {
+            // Normal Mod: Tamamen bağımsız
+            for (let i = 0; i < count; i++) {
+                p2Values.push(Math.floor(Math.random() * 6) + 1);
+            }
+        }
 
-        // Kazananı belirle
+        // Değerleri HTML'e aktar ve sınıfları kaldır
+        for (let i = 0; i < count; i++) {
+            p1DiceElements[i].textContent = p1Values[i];
+            p1DiceElements[i].classList.remove('shake');
+
+            p2DiceElements[i].textContent = p2Values[i];
+            p2DiceElements[i].classList.remove('shake');
+        }
+
+        const finalP1Total = p1Values.reduce((a, b) => a + b, 0);
+        const finalP2Total = p2Values.reduce((a, b) => a + b, 0);
+
+        p1ScoreEl.textContent = finalP1Total;
+        p2ScoreEl.textContent = finalP2Total;
+
         let resultMsg = "";
-        if (val2 > val1) {
+        if (finalP2Total > finalP1Total) {
             resultMsg = "🏆 2. Oyuncu Kazandı!";
-        } else if (val1 > val2) {
+        } else if (finalP1Total > finalP2Total) {
             resultMsg = "🏆 1. Oyuncu Kazandı!";
         } else {
             resultMsg = "🤝 Berabere!";
@@ -48,7 +91,7 @@ rollBtn.addEventListener('click', () => {
 
         // Geçmişe ekle
         const li = document.createElement('li');
-        li.textContent = `P1: ${val1} | P2: ${val2} -> ${resultMsg.replace('🏆 ', '')}`;
+        li.textContent = `${count} Zar | P1: ${finalP1Total} - P2: ${finalP2Total} -> ${resultMsg.replace('🏆 ', '')}`;
         historyList.prepend(li);
         
         if (historyList.children.length > 5) {
