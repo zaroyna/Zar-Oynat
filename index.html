@@ -60,9 +60,15 @@
             color: #333; border-radius: 10px;
             display: grid; grid-template: repeat(3, 1fr) / repeat(3, 1fr);
             padding: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.4), inset 0 2px 3px rgba(255,255,255,0.8);
-            transition: transform 0.4s ease, filter 0.2s; border: 1px solid #ccc; cursor: pointer;
+            transition: transform 0.3s ease, border-color 0.3s, box-shadow 0.3s; 
+            border: 2px solid #ccc; cursor: pointer;
         }
-        .dice-3d:hover { transform: scale(1.08); filter: brightness(1.05); border-color: #ff5e62; }
+        .dice-3d:hover { transform: scale(1.06); }
+        .dice-3d.selected {
+            border-color: #ff5e62;
+            box-shadow: 0 0 15px rgba(255, 94, 98, 0.6), inset 0 2px 3px rgba(255,255,255,0.8);
+            transform: scale(1.08);
+        }
         .dice-3d.shake { transform: rotate(360deg) scale(1.15); cursor: default; }
         .dot {
             background-color: #222; border-radius: 50%; align-self: center; justify-self: center;
@@ -107,9 +113,9 @@
         </div>
 
         <div class="section-box">
-            <h3 id="containerTitle">Zarları Seçin</h3>
+            <h3 id="containerTitle">Zarları Seçin (2 Adet Seçin)</h3>
             <div id="diceContainer" class="dice-flex-container"></div>
-            <div class="score-display">Toplam Skor: <span id="totalScore">2</span></div>
+            <div class="score-display">Seçilen Skor: <span id="totalScore">0</span></div>
         </div>
 
         <div id="battleResult" class="battle-result"></div>
@@ -130,9 +136,7 @@
             const battleResult = document.getElementById('battleResult');
             const historyList = document.getElementById('historyList');
 
-            let diceValues = [];
-            let diceElements = [];
-            let selectedCount = 0;
+            let diceData = []; // { value, selected, element }
             let isLocked = false;
 
             function createDiceElement(value) {
@@ -151,50 +155,60 @@
             function buildDiceDeck() {
                 const count = parseInt(diceCountSelect.value);
                 diceContainer.innerHTML = '';
-                diceValues = new Array(count).fill(1);
-                diceElements = [];
-                selectedCount = 0;
+                diceData = [];
                 isLocked = false;
 
-                containerTitle.textContent = "Zarları Seçin (2 Adet Seçince Başlar)";
-                totalScoreEl.textContent = count;
+                containerTitle.textContent = "Zarları Seçin (2 Adet Seçin)";
+                totalScoreEl.textContent = "0";
                 battleResult.textContent = '';
 
                 for (let i = 0; i < count; i++) {
-                    const dice = createDiceElement(1);
+                    // Zarların ilk görünüm değerleri rastgele ve sabit olsun
+                    const initialVal = Math.floor(Math.random() * 6) + 1;
+                    const diceEl = createDiceElement(initialVal);
 
-                    dice.addEventListener('click', () => {
+                    const item = {
+                        value: initialVal,
+                        selected: false,
+                        element: diceEl
+                    };
+
+                    diceEl.addEventListener('click', () => {
                         if (isLocked) return;
 
-                        // Tıklandıkça değer değişir
-                        diceValues[i] = diceValues[i] % 6 + 1;
-                        dice.setAttribute('data-value', diceValues[i]);
+                        // Seçim durumunu tersine çevir
+                        item.selected = !item.selected;
                         
-                        const currentTotal = diceValues.reduce((a, b) => a + b, 0);
+                        if (item.selected) {
+                            diceEl.classList.add('selected');
+                        } else {
+                            diceEl.classList.remove('selected');
+                        }
+
+                        // Seçilen zarların toplam değerini hesapla
+                        const selectedItems = diceData.filter(d => d.selected);
+                        const currentTotal = selectedItems.reduce((sum, d) => sum + d.value, 0);
                         totalScoreEl.textContent = currentTotal;
 
-                        selectedCount++;
-
-                        // 2 zar seçildiğinde otomatik başlat
-                        if (selectedCount >= 2) {
-                            startBattle();
+                        // Tam 2 zar seçildiyse otomatik başlat
+                        if (selectedItems.length === 2) {
+                            startBattle(currentTotal);
                         }
                     });
 
-                    diceContainer.appendChild(dice);
-                    diceElements.push(dice);
+                    diceContainer.appendChild(diceEl);
+                    diceData.push(item);
                 }
             }
 
-            function startBattle() {
+            function startBattle(userInitialTotal) {
                 isLocked = true;
                 const count = parseInt(diceCountSelect.value);
-                const userInitialTotal = diceValues.reduce((a, b) => a + b, 0);
 
                 containerTitle.textContent = "Sonuçlar";
                 battleResult.textContent = 'Zarlar hesaplanıyor...';
 
-                diceElements.forEach(dice => dice.classList.add('shake'));
+                diceData.forEach(d => d.element.classList.add('shake'));
 
                 setTimeout(() => {
                     let winningValues = [];
@@ -210,8 +224,8 @@
                     }
 
                     for (let i = 0; i < count; i++) {
-                        diceElements[i].setAttribute('data-value', winningValues[i]);
-                        diceElements[i].classList.remove('shake');
+                        diceData[i].element.setAttribute('data-value', winningValues[i]);
+                        diceData[i].element.classList.remove('shake', 'selected');
                     }
 
                     totalScoreEl.textContent = winningTotal;
