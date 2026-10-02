@@ -10,7 +10,6 @@ const historyList = document.getElementById('historyList');
 let diceValues = [];
 let diceElements = [];
 
-// 3D Zar HTML elementini oluşturan fonksiyon
 function createDiceElement(value, isInteractive) {
     const wrapper = document.createElement('div');
     wrapper.classList.add('dice-wrapper');
@@ -20,7 +19,6 @@ function createDiceElement(value, isInteractive) {
     if (isInteractive) dice.classList.add('interactive');
     dice.setAttribute('data-value', value);
 
-    // 3x3 grid noktaları (9 adet)
     for (let i = 0; i < 9; i++) {
         const dot = document.createElement('div');
         dot.classList.add('dot');
@@ -31,14 +29,13 @@ function createDiceElement(value, isInteractive) {
     return { wrapper, dice };
 }
 
-// Zarları Oluşturma Fonksiyonu (Başlangıçta hepsi 1 yazar)
 function buildDiceDeck() {
     const count = parseInt(diceCountSelect.value);
     diceContainer.innerHTML = '';
     diceValues = new Array(count).fill(1);
     diceElements = [];
 
-    containerTitle.textContent = "Zarları Sırayla Belirleyin";
+    containerTitle.textContent = "Seçilen Zarlar";
     totalScoreEl.textContent = count;
     battleResult.textContent = '';
     rollBtn.disabled = false;
@@ -51,7 +48,6 @@ function buildDiceDeck() {
         tag.textContent = `${i + 1}. Zar`;
         wrapper.insertBefore(tag, dice);
 
-        // Kullanıcı tıkladıkça 1-6 arası değer değiştirir
         dice.addEventListener('click', () => {
             diceValues[i] = diceValues[i] % 6 + 1;
             dice.setAttribute('data-value', diceValues[i]);
@@ -65,21 +61,15 @@ function buildDiceDeck() {
     }
 }
 
-// "Zarları Oluştur" butonuna tıklandığında
 initBtn.addEventListener('click', buildDiceDeck);
-
-// Sayfa açıldığında otomatik 1 deste kur
 buildDiceDeck();
 
-// "Mücadeleyi Başlat" butonuna tıklandığında
 rollBtn.addEventListener('click', () => {
     const count = parseInt(diceCountSelect.value);
     const userInitialTotal = diceValues.reduce((a, b) => a + b, 0);
 
-    // Başlıkları güncelle (Seçilen ve Kazanan)
-    containerTitle.textContent = "Seçilen ve Kazanan Zarlar";
+    containerTitle.textContent = "Kazanan Zarlar";
 
-    // Zarlara sallanma (atılma) efekti ver
     diceElements.forEach(dice => dice.classList.add('shake'));
     battleResult.textContent = 'Zarlar atılıyor...';
     rollBtn.disabled = true;
@@ -88,7 +78,6 @@ rollBtn.addEventListener('click', () => {
         let winningValues = [];
         let winningTotal = 0;
 
-        // Gizli Kural: Kazanan zarların toplamı, kullanıcının seçtiği toplamdan az olamaz
         while (winningTotal < userInitialTotal) {
             winningValues = [];
             for (let i = 0; i < count; i++) {
@@ -97,7 +86,6 @@ rollBtn.addEventListener('click', () => {
             winningTotal = winningValues.reduce((a, b) => a + b, 0);
         }
 
-        // Sonuçları zarlara işle ve sallantıyı kaldır
         for (let i = 0; i < count; i++) {
             diceElements[i].setAttribute('data-value', winningValues[i]);
             diceElements[i].classList.remove('shake');
@@ -105,12 +93,11 @@ rollBtn.addEventListener('click', () => {
 
         totalScoreEl.textContent = winningTotal;
 
-        let msg = `🎉 Mücadele Tamamlandı! Toplam Puan: ${winningTotal}`;
+        let msg = `🏆 Kazanan Toplam Puan: ${winningTotal}`;
         battleResult.textContent = msg;
 
-        // Geçmişe ekle
         const li = document.createElement('li');
-        li.textContent = `${count} Zar | Seçilen/Başlangıç Toplam: ${userInitialTotal} -> Kazanan Toplam: ${winningTotal}`;
+        li.textContent = `${count} Zar | Seçilen: ${userInitialTotal} ➔ Kazanan: ${winningTotal}`;
         historyList.prepend(li);
 
         if (historyList.children.length > 5) {
