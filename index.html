@@ -81,10 +81,12 @@
         [data-value="5"] .dot:nth-child(1), [data-value="5"] .dot:nth-child(3), [data-value="5"] .dot:nth-child(5), [data-value="5"] .dot:nth-child(7), [data-value="5"] .dot:nth-child(9) { display: block; }
         [data-value="6"] .dot:nth-child(1), [data-value="6"] .dot:nth-child(3), [data-value="6"] .dot:nth-child(4), [data-value="6"] .dot:nth-child(6), [data-value="6"] .dot:nth-child(7), [data-value="6"] .dot:nth-child(9) { display: block; }
         .score-display { margin-top: 6px; font-size: 11px; color: #a0a0c2; text-align: right; }
+        .btn-group { display: flex; gap: 8px; margin-bottom: 10px; }
         .btn {
             width: 100%; padding: 10px; border-radius: 10px; border: none; font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.3s ease;
         }
-        .btn.secondary { background: #45456f; color: white; width: auto; padding: 6px 14px; }
+        .btn.primary { background: linear-gradient(135deg, #00b09b, #96c93d); color: white; box-shadow: 0 4px 15px rgba(0, 176, 155, 0.4); }
+        .btn.secondary { background: #45456f; color: white; padding: 6px 12px; font-size: 13px; }
         .btn.secondary:hover { background: #5a5a8f; }
         .battle-result { font-weight: bold; font-size: 14px; margin: 10px 0; color: #ffd700; min-height: 18px; }
         .history-panel {
@@ -118,6 +120,10 @@
             <div class="score-display">Seçilen Skor: <span id="totalScore">0</span></div>
         </div>
 
+        <div class="btn-group">
+            <button id="replayBtn" class="btn primary" style="display: none;">Tekrar Oyna</button>
+        </div>
+
         <div id="battleResult" class="battle-result"></div>
 
         <div class="history-panel">
@@ -130,13 +136,14 @@
         document.addEventListener("DOMContentLoaded", () => {
             const diceCountSelect = document.getElementById('diceCount');
             const initBtn = document.getElementById('initBtn');
+            const replayBtn = document.getElementById('replayBtn');
             const diceContainer = document.getElementById('diceContainer');
             const containerTitle = document.getElementById('containerTitle');
             const totalScoreEl = document.getElementById('totalScore');
             const battleResult = document.getElementById('battleResult');
             const historyList = document.getElementById('historyList');
 
-            let diceData = []; // { value, selected, element }
+            let diceData = [];
             let isLocked = false;
 
             function createDiceElement(value) {
@@ -157,13 +164,13 @@
                 diceContainer.innerHTML = '';
                 diceData = [];
                 isLocked = false;
+                replayBtn.style.display = 'none';
 
                 containerTitle.textContent = "Zarları Seçin (2 Adet Seçin)";
                 totalScoreEl.textContent = "0";
                 battleResult.textContent = '';
 
                 for (let i = 0; i < count; i++) {
-                    // Zarların ilk görünüm değerleri rastgele ve sabit olsun
                     const initialVal = Math.floor(Math.random() * 6) + 1;
                     const diceEl = createDiceElement(initialVal);
 
@@ -176,7 +183,6 @@
                     diceEl.addEventListener('click', () => {
                         if (isLocked) return;
 
-                        // Seçim durumunu tersine çevir
                         item.selected = !item.selected;
                         
                         if (item.selected) {
@@ -185,12 +191,10 @@
                             diceEl.classList.remove('selected');
                         }
 
-                        // Seçilen zarların toplam değerini hesapla
                         const selectedItems = diceData.filter(d => d.selected);
                         const currentTotal = selectedItems.reduce((sum, d) => sum + d.value, 0);
                         totalScoreEl.textContent = currentTotal;
 
-                        // Tam 2 zar seçildiyse otomatik başlat
                         if (selectedItems.length === 2) {
                             startBattle(currentTotal);
                         }
@@ -214,7 +218,7 @@
                     let winningValues = [];
                     let winningTotal = 0;
 
-                    // Gizli Kural: 2. her zaman kazanır veya eşit olur
+                    // Gizli Kural
                     while (winningTotal < userInitialTotal) {
                         winningValues = [];
                         for (let i = 0; i < count; i++) {
@@ -238,10 +242,13 @@
                     if (historyList.children.length > 5) {
                         historyList.removeChild(historyList.lastChild);
                     }
+
+                    replayBtn.style.display = 'block';
                 }, 600);
             }
 
             initBtn.addEventListener('click', buildDiceDeck);
+            replayBtn.addEventListener('click', buildDiceDeck);
             diceCountSelect.addEventListener('change', buildDiceDeck);
             buildDiceDeck();
         });
