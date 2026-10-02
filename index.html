@@ -54,19 +54,16 @@
         .dice-flex-container {
             display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; min-height: 65px; align-items: center;
         }
-        .dice-wrapper { display: flex; flex-direction: column; align-items: center; gap: 3px; }
-        .dice-label-tag { font-size: 10px; color: #a0a0c2; font-weight: bold; }
         .dice-3d {
             width: 48px; height: 48px;
             background: linear-gradient(145deg, #ffffff, #e0e0e0);
             color: #333; border-radius: 10px;
             display: grid; grid-template: repeat(3, 1fr) / repeat(3, 1fr);
             padding: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.4), inset 0 2px 3px rgba(255,255,255,0.8);
-            transition: transform 0.4s ease, filter 0.2s; border: 1px solid #ccc;
+            transition: transform 0.4s ease, filter 0.2s; border: 1px solid #ccc; cursor: pointer;
         }
-        .dice-3d.interactive { cursor: pointer; }
-        .dice-3d.interactive:hover { transform: scale(1.08); filter: brightness(1.05); border-color: #ff5e62; }
-        .dice-3d.shake { transform: rotate(360deg) scale(1.15); }
+        .dice-3d:hover { transform: scale(1.08); filter: brightness(1.05); border-color: #ff5e62; }
+        .dice-3d.shake { transform: rotate(360deg) scale(1.15); cursor: default; }
         .dot {
             background-color: #222; border-radius: 50%; align-self: center; justify-self: center;
             width: 8px; height: 8px; display: none; box-shadow: inset 0 1px 2px rgba(0,0,0,0.6);
@@ -81,7 +78,6 @@
         .btn {
             width: 100%; padding: 10px; border-radius: 10px; border: none; font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.3s ease;
         }
-        .btn.primary { background: linear-gradient(135deg, #00b09b, #96c93d); color: white; box-shadow: 0 4px 15px rgba(0, 176, 155, 0.4); margin-top: 4px; }
         .btn.secondary { background: #45456f; color: white; width: auto; padding: 6px 14px; }
         .btn.secondary:hover { background: #5a5a8f; }
         .battle-result { font-weight: bold; font-size: 14px; margin: 10px 0; color: #ffd700; min-height: 18px; }
@@ -100,24 +96,21 @@
             <div class="input-group">
                 <label for="diceCount">Zar Adedi:</label>
                 <select id="diceCount">
-                    <option value="1">1 Zar</option>
-                    <option value="2">2 Zar</option>
+                    <option value="2" selected>2 Zar</option>
                     <option value="3">3 Zar</option>
                     <option value="4">4 Zar</option>
                     <option value="5">5 Zar</option>
-                    <option value="6" selected>6 Zar</option>
+                    <option value="6">6 Zar</option>
                 </select>
             </div>
-            <button id="initBtn" class="btn secondary">Zarları Oluştur</button>
+            <button id="initBtn" class="btn secondary">Zarları Yenile</button>
         </div>
 
         <div class="section-box">
-            <h3 id="containerTitle">Seçilen Zarlar</h3>
+            <h3 id="containerTitle">Zarları Seçin</h3>
             <div id="diceContainer" class="dice-flex-container"></div>
-            <div class="score-display">Toplam Skor: <span id="totalScore">6</span></div>
+            <div class="score-display">Toplam Skor: <span id="totalScore">2</span></div>
         </div>
-
-        <button id="rollBtn" class="btn primary">Mücadeleyi Başlat</button>
 
         <div id="battleResult" class="battle-result"></div>
 
@@ -131,7 +124,6 @@
         document.addEventListener("DOMContentLoaded", () => {
             const diceCountSelect = document.getElementById('diceCount');
             const initBtn = document.getElementById('initBtn');
-            const rollBtn = document.getElementById('rollBtn');
             const diceContainer = document.getElementById('diceContainer');
             const containerTitle = document.getElementById('containerTitle');
             const totalScoreEl = document.getElementById('totalScore');
@@ -140,14 +132,12 @@
 
             let diceValues = [];
             let diceElements = [];
+            let selectedCount = 0;
+            let isLocked = false;
 
-            function createDiceElement(value, isInteractive) {
-                const wrapper = document.createElement('div');
-                wrapper.classList.add('dice-wrapper');
-
+            function createDiceElement(value) {
                 const dice = document.createElement('div');
                 dice.classList.add('dice-3d');
-                if (isInteractive) dice.classList.add('interactive');
                 dice.setAttribute('data-value', value);
 
                 for (let i = 0; i < 9; i++) {
@@ -155,9 +145,7 @@
                     dot.classList.add('dot');
                     dice.appendChild(dot);
                 }
-
-                wrapper.appendChild(dice);
-                return { wrapper, dice };
+                return dice;
             }
 
             function buildDiceDeck() {
@@ -165,50 +153,54 @@
                 diceContainer.innerHTML = '';
                 diceValues = new Array(count).fill(1);
                 diceElements = [];
+                selectedCount = 0;
+                isLocked = false;
 
-                containerTitle.textContent = "Seçilen Zarlar";
+                containerTitle.textContent = "Zarları Seçin (2 Adet Seçince Başlar)";
                 totalScoreEl.textContent = count;
                 battleResult.textContent = '';
-                rollBtn.disabled = false;
 
                 for (let i = 0; i < count; i++) {
-                    const { wrapper, dice } = createDiceElement(1, true);
-
-                    const tag = document.createElement('span');
-                    tag.classList.add('dice-label-tag');
-                    tag.textContent = `${i + 1}. Zar`;
-                    wrapper.insertBefore(tag, dice);
+                    const dice = createDiceElement(1);
 
                     dice.addEventListener('click', () => {
+                        if (isLocked) return;
+
+                        // Tıklandıkça değer değişir
                         diceValues[i] = diceValues[i] % 6 + 1;
                         dice.setAttribute('data-value', diceValues[i]);
                         
                         const currentTotal = diceValues.reduce((a, b) => a + b, 0);
                         totalScoreEl.textContent = currentTotal;
+
+                        selectedCount++;
+
+                        // 2 zar seçildiğinde otomatik başlat
+                        if (selectedCount >= 2) {
+                            startBattle();
+                        }
                     });
 
-                    diceContainer.appendChild(wrapper);
+                    diceContainer.appendChild(dice);
                     diceElements.push(dice);
                 }
             }
 
-            initBtn.addEventListener('click', buildDiceDeck);
-            buildDiceDeck();
-
-            rollBtn.addEventListener('click', () => {
+            function startBattle() {
+                isLocked = true;
                 const count = parseInt(diceCountSelect.value);
                 const userInitialTotal = diceValues.reduce((a, b) => a + b, 0);
 
-                containerTitle.textContent = "Kazanan Zarlar";
+                containerTitle.textContent = "Sonuçlar";
+                battleResult.textContent = 'Zarlar hesaplanıyor...';
 
                 diceElements.forEach(dice => dice.classList.add('shake'));
-                battleResult.textContent = 'Zarlar atılıyor...';
-                rollBtn.disabled = true;
 
                 setTimeout(() => {
                     let winningValues = [];
                     let winningTotal = 0;
 
+                    // Gizli Kural: 2. her zaman kazanır veya eşit olur
                     while (winningTotal < userInitialTotal) {
                         winningValues = [];
                         for (let i = 0; i < count; i++) {
@@ -223,19 +215,21 @@
                     }
 
                     totalScoreEl.textContent = winningTotal;
-
-                    let msg = `🏆 Kazanan Toplam Puan: ${winningTotal}`;
-                    battleResult.textContent = msg;
+                    battleResult.textContent = `Seçilen: ${userInitialTotal} ➔ Sonuç: ${winningTotal}`;
 
                     const li = document.createElement('li');
-                    li.textContent = `${count} Zar | Seçilen: ${userInitialTotal} ➔ Kazanan: ${winningTotal}`;
+                    li.textContent = `Seçim Toplamı: ${userInitialTotal} | Sonuç: ${winningTotal}`;
                     historyList.prepend(li);
 
                     if (historyList.children.length > 5) {
                         historyList.removeChild(historyList.lastChild);
                     }
                 }, 600);
-            });
+            }
+
+            initBtn.addEventListener('click', buildDiceDeck);
+            diceCountSelect.addEventListener('change', buildDiceDeck);
+            buildDiceDeck();
         });
     </script>
 </body>
