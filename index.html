@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zar Düellosu</title>
+    <title>Gelişmiş Zar Düellosu</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Zar Seçme Düellosu</h1>
+    <div class="glass-container">
+        <h1>🎲 Taktiksel Zar Düellosu</h1>
         
-        <div class="controls">
-            <div class="control-group">
-                <label for="diceCount">Atılacak Zar Adedi:</label>
+        <div class="config-panel">
+            <div class="input-group">
+                <label for="diceCount">Zar Adedi:</label>
                 <select id="diceCount">
                     <option value="1">1 Zar</option>
                     <option value="2">2 Zar</option>
@@ -22,26 +22,29 @@
                     <option value="6" selected>6 Zar</option>
                 </select>
             </div>
-            
-            <button id="rollBtn">Zarları At!</button>
+            <button id="initBtn" class="btn secondary">Zarları Oluştur</button>
         </div>
 
-        <div class="dice-section">
-            <h3>1. Seçilen Zarlar</h3>
-            <div id="firstDiceContainer" class="dice-grid"></div>
-            <div class="score">Toplam: <span id="firstScore">0</span></div>
+        <!-- 1. Seçim (Kullanıcı Tarafından Manuel Belirlenir) -->
+        <div class="section-box">
+            <h3>1. Seçiminiz (Kendi Zarlarınızı Belirleyin)</h3>
+            <div id="userDiceContainer" class="dice-grid"></div>
+            <div class="score-display">Toplam Skor: <span id="userScore">0</span></div>
         </div>
 
-        <div class="dice-section">
-            <h3>2. Seçilen Zarlar (Hep Kazanır)</h3>
-            <div id="secondDiceContainer" class="dice-grid"></div>
-            <div class="score">Toplam: <span id="secondScore">0</span></div>
+        <!-- 2. Seçim (Sistem Karşılığı) -->
+        <div class="section-box">
+            <h3>2. Seçim (Rakip Zarlar)</h3>
+            <div id="rivalDiceContainer" class="dice-grid"></div>
+            <div class="score-display">Toplam Skor: <span id="rivalScore">0</span></div>
         </div>
 
-        <div id="winnerText" class="winner-text"></div>
+        <button id="rollBtn" class="btn primary" disabled>Mücadeleyi Başlat!</button>
 
-        <div class="history-container">
-            <h3>Geçmiş Atışlar</h3>
+        <div id="battleResult" class="battle-result"></div>
+
+        <div class="history-panel">
+            <h4>Mücadele Geçmişi</h4>
             <ul id="historyList"></ul>
         </div>
     </div>
