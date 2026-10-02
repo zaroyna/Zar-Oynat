@@ -1,80 +1,110 @@
-const rollBtn = document.getElementById('rollBtn');
 const diceCountSelect = document.getElementById('diceCount');
-const firstContainer = document.getElementById('firstDiceContainer');
-const secondContainer = document.getElementById('secondDiceContainer');
-const firstScoreEl = document.getElementById('firstScore');
-const secondScoreEl = document.getElementById('secondScore');
-const winnerText = document.getElementById('winnerText');
+const initBtn = document.getElementById('initBtn');
+const rollBtn = document.getElementById('rollBtn');
+const userDiceContainer = document.getElementById('userDiceContainer');
+const rivalDiceContainer = document.getElementById('rivalDiceContainer');
+const userScoreEl = document.getElementById('userScore');
+const rivalScoreEl = document.getElementById('rivalScore');
+const battleResult = document.getElementById('battleResult');
 const historyList = document.getElementById('historyList');
 
-rollBtn.addEventListener('click', () => {
+let userDiceValues = [];
+
+// 1. Adım: Zarları Oluştur ve Kullanıcının Seçmesine İzin Ver
+initBtn.addEventListener('click', () => {
     const count = parseInt(diceCountSelect.value);
+    userDiceContainer.innerHTML = '';
+    rivalDiceContainer.innerHTML = '';
+    userDiceValues = new Array(count).fill(1); // Başlangıçta hepsi 1
+    
+    userScoreEl.textContent = count;
+    rivalScoreEl.textContent = '0';
+    battleResult.textContent = '';
+    rollBtn.disabled = false;
 
-    firstContainer.innerHTML = '';
-    secondContainer.innerHTML = '';
-    firstScoreEl.textContent = '...';
-    secondScoreEl.textContent = '...';
-    winnerText.textContent = '';
-
-    const firstDiceElements = [];
-    const secondDiceElements = [];
-
+    // Kullanıcı için tıklandıkça 1-6 arası değişen interaktif zar butonları üret
     for (let i = 0; i < count; i++) {
-        const d1 = document.createElement('div');
-        d1.classList.add('dice', 'shake');
-        d1.textContent = '...';
-        firstContainer.appendChild(d1);
-        firstDiceElements.push(d1);
-
-        const d2 = document.createElement('div');
-        d2.classList.add('dice', 'shake');
-        d2.textContent = '...';
-        secondContainer.appendChild(d2);
-        secondDiceElements.push(d2);
+        const btn = document.createElement('button');
+        btn.classList.add('dice-select');
+        btn.textContent = '1';
+        
+        btn.addEventListener('click', () => {
+            // Tıklandıkça 1 artır, 6'dan sonra tekrar 1 yap
+            userDiceValues[i] = userDiceValues[i] % 6 + 1;
+            btn.textContent = userDiceValues[i];
+            
+            // Toplam skoru anlık güncelle
+            const currentTotal = userDiceValues.reduce((a, b) => a + b, 0);
+            userScoreEl.textContent = currentTotal;
+        });
+        
+        userDiceContainer.appendChild(btn);
     }
 
+    // Rakip kutucuklarına başlangıç yer tutucuları koy
+    for (let i = 0; i < count; i++) {
+        const div = document.createElement('div');
+        div.classList.add('dice-static');
+        div.textContent = '?';
+        rivalDiceContainer.appendChild(div);
+    }
+});
+
+// Sayfa ilk açıldığında otomatik bir kez oluştursun
+initBtn.click();
+
+// 2. Adım: Mücadeleyi Başlat ve Rakip Zarlarını Kurala Göre Hesapla
+rollBtn.addEventListener('click', () => {
+    const count = parseInt(diceCountSelect.value);
+    const userTotal = userDiceValues.reduce((a, b) => a + b, 0);
+
+    // Rakip zarları için sallanma efekti
+    rivalDiceContainer.innerHTML = '';
+    const rivalElements = [];
+    for (let i = 0; i < count; i++) {
+        const div = document.createElement('div');
+        div.classList.add('dice-static', 'shake');
+        div.textContent = '...';
+        rivalDiceContainer.appendChild(div);
+        rivalElements.push(div);
+    }
+    battleResult.textContent = 'Hesaplanıyor...';
+
     setTimeout(() => {
-        let firstValues = [];
-        let secondValues = [];
+        let rivalValues = [];
+        let rivalTotal = 0;
 
-        for (let i = 0; i < count; i++) {
-            firstValues.push(Math.floor(Math.random() * 6) + 1);
-        }
-
-        const firstTotal = firstValues.reduce((a, b) => a + b, 0);
-        let secondTotal = 0;
-
-        while (secondTotal < firstTotal) {
-            secondValues = [];
+        // Kural: 2. seçilen (rakip) zarların toplamı, kullanıcının toplamından az olamaz (2. hep kazanır/berabere kalır)
+        while (rivalTotal < userTotal) {
+            rivalValues = [];
             for (let i = 0; i < count; i++) {
-                secondValues.push(Math.floor(Math.random() * 6) + 1);
+                rivalValues.push(Math.floor(Math.random() * 6) + 1);
             }
-            secondTotal = secondValues.reduce((a, b) => a + b, 0);
+            rivalTotal = rivalValues.reduce((a, b) => a + b, 0);
         }
 
+        // Rakip zarlarını ekrana yansıt
         for (let i = 0; i < count; i++) {
-            firstDiceElements[i].textContent = firstValues[i];
-            firstDiceElements[i].classList.remove('shake');
-
-            secondDiceElements[i].textContent = secondValues[i];
-            secondDiceElements[i].classList.remove('shake');
+            rivalElements[i].textContent = rivalValues[i];
+            rivalElements[i].classList.remove('shake');
         }
 
-        firstScoreEl.textContent = firstTotal;
-        secondScoreEl.textContent = secondTotal;
+        rivalScoreEl.textContent = rivalTotal;
 
-        let resultMsg = "";
-        if (secondTotal > firstTotal) {
-            resultMsg = "🏆 2. Seçilen Zar Kazandı!";
+        // Sonuç mesajı
+        let msg = "";
+        if (rivalTotal > userTotal) {
+            msg = "🏆 2. Seçim (Rakip) Kazandı!";
         } else {
-            resultMsg = "🤝 Berabere!";
+            msg = "🤝 Berabere!";
         }
-        winnerText.textContent = resultMsg;
+        battleResult.textContent = msg;
 
+        // Geçmişe ekle
         const li = document.createElement('li');
-        li.textContent = `${count} Zar | 1. Seçim: ${firstTotal} - 2. Seçim: ${secondTotal} -> ${resultMsg.replace('🏆 ', '')}`;
+        li.textContent = `${count} Zar | Sizin Seçim: ${userTotal} - Rakip: ${rivalTotal} -> ${msg.replace('🏆 ', '')}`;
         historyList.prepend(li);
-        
+
         if (historyList.children.length > 5) {
             historyList.removeChild(historyList.lastChild);
         }
