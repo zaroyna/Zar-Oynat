@@ -1,97 +1,83 @@
 const rollBtn = document.getElementById('rollBtn');
 const diceCountSelect = document.getElementById('diceCount');
-const gameModeSelect = document.getElementById('gameMode');
-const p1Container = document.getElementById('player1DiceContainer');
-const p2Container = document.getElementById('player2DiceContainer');
-const p1ScoreEl = document.getElementById('p1Score');
-const p2ScoreEl = document.getElementById('p2Score');
+const firstContainer = document.getElementById('firstDiceContainer');
+const secondContainer = document.getElementById('secondDiceContainer');
+const firstScoreEl = document.getElementById('firstScore');
+const secondScoreEl = document.getElementById('secondScore');
 const winnerText = document.getElementById('winnerText');
 const historyList = document.getElementById('historyList');
 
 rollBtn.addEventListener('click', () => {
     const count = parseInt(diceCountSelect.value);
-    const isRigged = gameModeSelect.value === 'rigged';
 
-    // Alanları temizle ve sallanma efekti koy
-    p1Container.innerHTML = '';
-    p2Container.innerHTML = '';
-    p1ScoreEl.textContent = '...';
-    p2ScoreEl.textContent = '...';
+    // Eski zarları temizle ve sallanma efekti ekle
+    firstContainer.innerHTML = '';
+    secondContainer.innerHTML = '';
+    firstScoreEl.textContent = '...';
+    secondScoreEl.textContent = '...';
     winnerText.textContent = '';
 
-    const p1DiceElements = [];
-    const p2DiceElements = [];
+    const firstDiceElements = [];
+    const secondDiceElements = [];
 
     for (let i = 0; i < count; i++) {
         const d1 = document.createElement('div');
         d1.classList.add('dice', 'shake');
         d1.textContent = '...';
-        p1Container.appendChild(d1);
-        p1DiceElements.push(d1);
+        firstContainer.appendChild(d1);
+        firstDiceElements.push(d1);
 
         const d2 = document.createElement('div');
         d2.classList.add('dice', 'shake');
         d2.textContent = '...';
-        p2Container.appendChild(d2);
-        p2DiceElements.push(d2);
+        secondContainer.appendChild(d2);
+        secondDiceElements.push(d2);
     }
 
     setTimeout(() => {
-        let p1Values = [];
-        let p2Values = [];
+        let firstValues = [];
+        let secondValues = [];
 
-        // 1. Oyuncu için zarları at
+        // 1. Seçilen zarları rastgele at
         for (let i = 0; i < count; i++) {
-            p1Values.push(Math.floor(Math.random() * 6) + 1);
+            firstValues.push(Math.floor(Math.random() * 6) + 1);
         }
 
-        if (isRigged) {
-            // Hileli Mod: 2. oyuncunun toplamı 1. oyuncudan az olamaz
-            const p1Total = p1Values.reduce((a, b) => a + b, 0);
-            let p2Total = 0;
-            
-            while (p2Total < p1Total) {
-                p2Values = [];
-                for (let i = 0; i < count; i++) {
-                    p2Values.push(Math.floor(Math.random() * 6) + 1);
-                }
-                p2Total = p2Values.reduce((a, b) => a + b, 0);
-            }
-        } else {
-            // Normal Mod: Tamamen bağımsız
+        const firstTotal = firstValues.reduce((a, b) => a + b, 0);
+        let secondTotal = 0;
+
+        // 2. Seçilen zarların toplamı, 1. seçilenden az olamaz (2. her zaman kazanır veya berabere kalır)
+        while (secondTotal < firstTotal) {
+            secondValues = [];
             for (let i = 0; i < count; i++) {
-                p2Values.push(Math.floor(Math.random() * 6) + 1);
+                secondValues.push(Math.floor(Math.random() * 6) + 1);
             }
+            secondTotal = secondValues.reduce((a, b) => a + b, 0);
         }
 
-        // Değerleri HTML'e aktar ve sınıfları kaldır
+        // Zarları ekrana yazdır ve animasyonu kaldır
         for (let i = 0; i < count; i++) {
-            p1DiceElements[i].textContent = p1Values[i];
-            p1DiceElements[i].classList.remove('shake');
+            firstDiceElements[i].textContent = firstValues[i];
+            firstDiceElements[i].classList.remove('shake');
 
-            p2DiceElements[i].textContent = p2Values[i];
-            p2DiceElements[i].classList.remove('shake');
+            secondDiceElements[i].textContent = secondValues[i];
+            secondDiceElements[i].classList.remove('shake');
         }
 
-        const finalP1Total = p1Values.reduce((a, b) => a + b, 0);
-        const finalP2Total = p2Values.reduce((a, b) => a + b, 0);
-
-        p1ScoreEl.textContent = finalP1Total;
-        p2ScoreEl.textContent = finalP2Total;
+        firstScoreEl.textContent = firstTotal;
+        secondScoreEl.textContent = secondTotal;
 
         let resultMsg = "";
-        if (finalP2Total > finalP1Total) {
-            resultMsg = "🏆 2. Oyuncu Kazandı!";
-        } else if (finalP1Total > finalP2Total) {
-            resultMsg = "🏆 1. Oyuncu Kazandı!";
+        if (secondTotal > firstTotal) {
+            resultMsg = "🏆 2. Seçilen Zar Kazandı!";
         } else {
             resultMsg = "🤝 Berabere!";
         }
         winnerText.textContent = resultMsg;
 
-        // Geçmişe ekle
+        // Geçmişe kaydet
         const li = document.createElement('li');
-        li.textContent = `${count} Zar | P1: ${finalP1Total} - P2: ${finalP2Total} -> ${resultMsg.replace('🏆 ', '')}`;
+        li.textContent = `${count} Zar | 1. Seçim: ${firstTotal} - 2. Seçim: ${secondTotal} -> ${resultMsg.replace('🏆 ', '')}`;
         historyList.prepend(li);
         
         if (historyList.children.length > 5) {
