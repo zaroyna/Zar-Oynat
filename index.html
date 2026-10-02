@@ -81,12 +81,10 @@
         [data-value="5"] .dot:nth-child(1), [data-value="5"] .dot:nth-child(3), [data-value="5"] .dot:nth-child(5), [data-value="5"] .dot:nth-child(7), [data-value="5"] .dot:nth-child(9) { display: block; }
         [data-value="6"] .dot:nth-child(1), [data-value="6"] .dot:nth-child(3), [data-value="6"] .dot:nth-child(4), [data-value="6"] .dot:nth-child(6), [data-value="6"] .dot:nth-child(7), [data-value="6"] .dot:nth-child(9) { display: block; }
         .score-display { margin-top: 6px; font-size: 11px; color: #a0a0c2; text-align: right; }
-        .btn-group { display: flex; gap: 8px; margin-bottom: 10px; }
         .btn {
             width: 100%; padding: 10px; border-radius: 10px; border: none; font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.3s ease;
         }
-        .btn.primary { background: linear-gradient(135deg, #00b09b, #96c93d); color: white; box-shadow: 0 4px 15px rgba(0, 176, 155, 0.4); }
-        .btn.secondary { background: #45456f; color: white; padding: 6px 12px; font-size: 13px; }
+        .btn.secondary { background: #45456f; color: white; width: auto; padding: 6px 14px; }
         .btn.secondary:hover { background: #5a5a8f; }
         .battle-result { font-weight: bold; font-size: 14px; margin: 10px 0; color: #ffd700; min-height: 18px; }
         .history-panel {
@@ -120,10 +118,6 @@
             <div class="score-display">Seçilen Skor: <span id="totalScore">0</span></div>
         </div>
 
-        <div class="btn-group">
-            <button id="replayBtn" class="btn primary" style="display: none;">Tekrar Oyna</button>
-        </div>
-
         <div id="battleResult" class="battle-result"></div>
 
         <div class="history-panel">
@@ -136,7 +130,6 @@
         document.addEventListener("DOMContentLoaded", () => {
             const diceCountSelect = document.getElementById('diceCount');
             const initBtn = document.getElementById('initBtn');
-            const replayBtn = document.getElementById('replayBtn');
             const diceContainer = document.getElementById('diceContainer');
             const containerTitle = document.getElementById('containerTitle');
             const totalScoreEl = document.getElementById('totalScore');
@@ -145,6 +138,7 @@
 
             let diceData = [];
             let isLocked = false;
+            let hasPlayed = false;
 
             function createDiceElement(value) {
                 const dice = document.createElement('div');
@@ -159,12 +153,27 @@
                 return dice;
             }
 
+            function resetSelection() {
+                diceData.forEach(d => {
+                    d.selected = false;
+                    d.element.classList.remove('selected', 'shake');
+                    // Yeni tur için zarlara yeni rastgele sabit değerler verelim ki tekrar seçilebilsin
+                    d.value = Math.floor(Math.random() * 6) + 1;
+                    d.element.setAttribute('data-value', d.value);
+                });
+                totalScoreEl.textContent = "0";
+                containerTitle.textContent = "Zarları Seçin (2 Adet Seçin)";
+                battleResult.textContent = '';
+                isLocked = false;
+                hasPlayed = false;
+            }
+
             function buildDiceDeck() {
                 const count = parseInt(diceCountSelect.value);
                 diceContainer.innerHTML = '';
                 diceData = [];
                 isLocked = false;
-                replayBtn.style.display = 'none';
+                hasPlayed = false;
 
                 containerTitle.textContent = "Zarları Seçin (2 Adet Seçin)";
                 totalScoreEl.textContent = "0";
@@ -182,6 +191,11 @@
 
                     diceEl.addEventListener('click', () => {
                         if (isLocked) return;
+
+                        // Eğer daha önce oyun oynandıysa, yeni tıklamada tahtayı otomatik sıfırla ve yeni tura başla
+                        if (hasPlayed) {
+                            resetSelection();
+                        }
 
                         item.selected = !item.selected;
                         
@@ -207,6 +221,7 @@
 
             function startBattle(userInitialTotal) {
                 isLocked = true;
+                hasPlayed = true;
                 const count = parseInt(diceCountSelect.value);
 
                 containerTitle.textContent = "Sonuçlar";
@@ -243,12 +258,11 @@
                         historyList.removeChild(historyList.lastChild);
                     }
 
-                    replayBtn.style.display = 'block';
+                    isLocked = false; // Yeni seçime izin ver
                 }, 600);
             }
 
             initBtn.addEventListener('click', buildDiceDeck);
-            replayBtn.addEventListener('click', buildDiceDeck);
             diceCountSelect.addEventListener('change', buildDiceDeck);
             buildDiceDeck();
         });
