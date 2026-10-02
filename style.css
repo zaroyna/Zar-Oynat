@@ -15,7 +15,7 @@ body {
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     text-align: center;
-    width: 420px;
+    width: 380px;
 }
 
 h1 {
@@ -51,7 +51,7 @@ select, button {
 select {
     background: #45456f;
     color: white;
-    width: 150px;
+    width: 120px;
     cursor: pointer;
 }
 
@@ -61,29 +61,22 @@ button {
     font-weight: bold;
     cursor: pointer;
     transition: background 0.3s;
-    margin-top: 5px;
+    width: 100%;
 }
 
 button:hover {
     background: #96c93d;
 }
 
-.players-container {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    margin: 15px 0;
-}
-
-.player-column {
+.dice-section {
     background: #252538;
     padding: 10px;
     border-radius: 10px;
-    width: 48%;
+    margin: 10px 0;
 }
 
-.player-column h3 {
-    margin: 0 0 8px 0;
+.dice-section h3 {
+    margin: 0 0 6px 0;
     font-size: 13px;
     color: #ff5e62;
 }
@@ -92,9 +85,9 @@ button:hover {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 5px;
-    min-height: 80px;
-    align-content: center;
+    gap: 8px;
+    min-height: 45px;
+    align-items: center;
 }
 
 .dice {
@@ -117,7 +110,7 @@ button:hover {
 }
 
 .score {
-    margin-top: 8px;
+    margin-top: 6px;
     font-size: 12px;
     color: #a0a0c0;
 }
@@ -131,7 +124,7 @@ button:hover {
 }
 
 .history-container {
-    max-height: 90px;
+    max-height: 80px;
     overflow-y: auto;
     background: #252538;
     padding: 8px;
