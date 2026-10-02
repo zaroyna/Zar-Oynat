@@ -10,7 +10,6 @@ const historyList = document.getElementById('historyList');
 rollBtn.addEventListener('click', () => {
     const count = parseInt(diceCountSelect.value);
 
-    // Eski zarları temizle ve sallanma efekti ekle
     firstContainer.innerHTML = '';
     secondContainer.innerHTML = '';
     firstScoreEl.textContent = '...';
@@ -38,7 +37,6 @@ rollBtn.addEventListener('click', () => {
         let firstValues = [];
         let secondValues = [];
 
-        // 1. Seçilen zarları rastgele at
         for (let i = 0; i < count; i++) {
             firstValues.push(Math.floor(Math.random() * 6) + 1);
         }
@@ -46,7 +44,6 @@ rollBtn.addEventListener('click', () => {
         const firstTotal = firstValues.reduce((a, b) => a + b, 0);
         let secondTotal = 0;
 
-        // 2. Seçilen zarların toplamı, 1. seçilenden az olamaz (2. her zaman kazanır veya berabere kalır)
         while (secondTotal < firstTotal) {
             secondValues = [];
             for (let i = 0; i < count; i++) {
@@ -55,7 +52,6 @@ rollBtn.addEventListener('click', () => {
             secondTotal = secondValues.reduce((a, b) => a + b, 0);
         }
 
-        // Zarları ekrana yazdır ve animasyonu kaldır
         for (let i = 0; i < count; i++) {
             firstDiceElements[i].textContent = firstValues[i];
             firstDiceElements[i].classList.remove('shake');
@@ -75,7 +71,6 @@ rollBtn.addEventListener('click', () => {
         }
         winnerText.textContent = resultMsg;
 
-        // Geçmişe kaydet
         const li = document.createElement('li');
         li.textContent = `${count} Zar | 1. Seçim: ${firstTotal} - 2. Seçim: ${secondTotal} -> ${resultMsg.replace('🏆 ', '')}`;
         historyList.prepend(li);
