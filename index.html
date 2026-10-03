@@ -153,18 +153,14 @@
                 return dice;
             }
 
-            function resetSelection() {
+            function clearSelectionsOnly() {
                 diceData.forEach(d => {
                     d.selected = false;
                     d.element.classList.remove('selected', 'shake');
-                    // Yeni tur için zarlara yeni rastgele sabit değerler verelim ki tekrar seçilebilsin
-                    d.value = Math.floor(Math.random() * 6) + 1;
-                    d.element.setAttribute('data-value', d.value);
                 });
                 totalScoreEl.textContent = "0";
                 containerTitle.textContent = "Zarları Seçin (2 Adet Seçin)";
                 battleResult.textContent = '';
-                isLocked = false;
                 hasPlayed = false;
             }
 
@@ -184,7 +180,9 @@
                     const diceEl = createDiceElement(initialVal);
 
                     const item = {
-                        value: initialVal,
+                        get value() {
+                            return parseInt(diceEl.getAttribute('data-value')) || 1;
+                        },
                         selected: false,
                         element: diceEl
                     };
@@ -192,9 +190,8 @@
                     diceEl.addEventListener('click', () => {
                         if (isLocked) return;
 
-                        // Eğer daha önce oyun oynandıysa, yeni tıklamada tahtayı otomatik sıfırla ve yeni tura başla
                         if (hasPlayed) {
-                            resetSelection();
+                            clearSelectionsOnly();
                         }
 
                         item.selected = !item.selected;
@@ -233,7 +230,6 @@
                     let winningValues = [];
                     let winningTotal = 0;
 
-                    // Gizli Kural
                     while (winningTotal < userInitialTotal) {
                         winningValues = [];
                         for (let i = 0; i < count; i++) {
@@ -258,7 +254,7 @@
                         historyList.removeChild(historyList.lastChild);
                     }
 
-                    isLocked = false; // Yeni seçime izin ver
+                    isLocked = false;
                 }, 600);
             }
 
